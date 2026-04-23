@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nabil | AI Automation Engineer</title>
+
+    <link rel="icon" href="assets/about-photo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Fira+Code&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* ─── الألوان الأساسية للموقع ─── */
+        :root {
+            --bg:            #030304;
+            --bg-alt:        #07070d;
+            --gold:          #d4af37;
+            --gold-light:    #e8cc6a;
+            --gold-glow:     rgba(212, 175, 55, 0.15);
+            --gold-dim:      rgba(212, 175, 55, 0.12);
+            --gold-border:   rgba(212, 175, 55, 0.28);
+          
+            --text:          #f0f0f0;
+            --text-muted:    #8b8b93;
+            --text-dim:      #4a4a52;
+          
+            --glass-bg:      rgba(255, 255, 255, 0.025);
+            --glass-border:  rgba(255, 255, 255, 0.07);
+          
+            --font-display:  'Playfair Display', Georgia, serif;
+            --font-body:     'Montserrat', sans-serif;
+            --font-mono:     'Fira Code', 'Courier New', monospace;
+        }
+
+        /* ─── INTRO SCREEN ─── */
+        #intro {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at 60% 40%, var(--bg-alt) 0%, var(--bg) 60%, #000 100%);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            font-family: var(--font-body);
+            overflow: hidden;
+        }
+
+        #intro.hide {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.05);
+        }
+
+        /* Animated grid lines - بلون دهبي خفيف جداً */
+        #intro::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(212, 175, 55, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(212, 175, 55, 0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 8s linear infinite;
+        }
+
+        @keyframes gridMove {
+            from { background-position: 0 0; }
+            to { background-position: 60px 60px; }
+        }
+
+        /* Scanline */
+        #intro::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.15) 2px,
+                rgba(0,0,0,0.15) 4px
+            );
+            pointer-events: none;
+        }
+
+        /* Glowing orb background - إضاءات دهبية */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: orbPulse 4s ease-in-out infinite alternate;
+        }
+        .orb-1 {
+            width: clamp(250px, 50vw, 500px); 
+            height: clamp(250px, 50vw, 500px);
+            background: radial-gradient(circle, var(--gold-glow), transparent 70%);
+            top: -10%; left: 10%;
+        }
+        .orb-2 {
+            width: clamp(200px, 40vw, 400px); 
+            height: clamp(200px, 40vw, 400px);
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.1), transparent 70%);
+            bottom: -5%; right: 10%;
+            animation-delay: -2s;
+        }
+        @keyframes orbPulse {
+            from { opacity: 0.5; transform: scale(1); }
+            to { opacity: 1; transform: scale(1.1); }
+        }
+
+        /* Floating dot */
+        .dot-indicator {
+            position: absolute;
+            top: 60px;
+            left: clamp(20px, 5vw, 40px);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold);
+            animation: dotBlink 1.5s ease-in-out infinite;
+            opacity: 0;
+            animation-delay: 0.5s;
+            animation-fill-mode: forwards;
+        }
+        @keyframes dotBlink {
+            0%, 100% { opacity: 0.4; box-shadow: 0 0 6px var(--gold); }
+            50% { opacity: 1; box-shadow: 0 0 16px var(--gold), 0 0 30px var(--gold); }
+        }
+
+        /* Top line */
+        .top-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 2px;
+            width: 0;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            animation: topLineExpand 1s ease-out 0.2s forwards;
+        }
+        @keyframes topLineExpand {
+            to { width: 100%; }
+        }
+
+        .intro-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(16px, 4vw, 28px);
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .icons-row {
+            display: flex;
+            gap: 16px;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeDown 0.6s ease 0.8s forwards;
+        }
+
+        .icon-box {
+            position: relative;
+            width: clamp(50px, 12vw, 64px);
+            height: clamp(40px, 10vw, 52px);
+            border: 1px solid var(--gold-border);
+            border-radius: 10px;
+            background: var(--glass-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 12px var(--gold-dim), inset 0 0 12px rgba(212, 175, 55, 0.05);
+            animation: iconPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275) both;
+        }
+        #intro .icon-box::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -10px;
+            width: 28px;
+            height: 2px;
+            border-radius: 2px;
+            background: var(--gold);
+            transform: translateX(-50%) scaleX(0);
+            transform-origin: center;
+            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+        #intro .icon-box:hover::after {
+            transform: translateX(-50%) scaleX(1);
+        }
+        .icon-box svg {
+            width: clamp(18px, 5vw, 24px);
+            height: clamp(18px, 5vw, 24px);
+        }
+        .icon-box:nth-child(1) { animation-delay: 1s; }
+        .icon-box:nth-child(2) { animation-delay: 1.15s; }
+        .icon-box:nth-child(3) { animation-delay: 1.3s; }
+
+        @keyframes iconPop {
+            from { opacity: 0; transform: scale(0.5) translateY(-10px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .icon-box:hover {
+            background: var(--gold-dim);
+            box-shadow: 0 0 20px var(--gold-border), inset 0 0 20px var(--gold-glow);
+            transform: translateY(-3px);
+            color: var(--gold-light);
+        }
+
+        .welcome-line {
+            font-family: var(--font-body);
+            font-size: clamp(14px, 3vw, 24px);
+            font-weight: 400;
+            color: var(--text-muted);
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.7s ease 1.5s forwards;
+            text-shadow: 0 0 30px var(--gold-glow);
+            margin-bottom: 8px;
+        }
+
+        .portfolio-line {
+            font-family: var(--font-display);
+            font-size: clamp(24px, 6vw, 52px);
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: 0.08em;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.7s ease 1.8s forwards;
+            text-shadow:
+                0 0 20px rgba(212, 175, 55, 0.4),
+                0 0 60px rgba(212, 175, 55, 0.2),
+                0 2px 4px rgba(0,0,0,0.8);
+            background: linear-gradient(180deg, #ffffff 40%, var(--gold-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeDown {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .url-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 20px;
+            border: 1px solid var(--gold-border);
+            border-radius: 8px;
+            background: var(--bg-alt);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            animation: fadeUp 0.6s ease 2.2s forwards;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+        }
+
+        .url-icon {
+            color: var(--gold);
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .url-text {
+            font-family: var(--font-mono);
+            font-size: clamp(13px, 3.5vw, 15px);
+            color: var(--gold-light);
+            letter-spacing: 0.05em;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 15px;
+            background: var(--gold);
+            margin-left: 2px;
+            vertical-align: middle;
+            animation: blink 0.8s step-end infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .progress-bar {
+            width: clamp(140px, 40vw, 180px);
+            height: 2px;
+            background: var(--gold-dim);
+            border-radius: 2px;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeUp 0.4s ease 2.5s forwards;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            border-radius: 2px;
+            box-shadow: 0 0 8px var(--gold);
+            animation: progressFill 2s ease 2.7s forwards;
+        }
+        @keyframes progressFill {
+            to { width: 100%; }
+        }
+
+        /* ─── الغلاف الخاص بمحتوى الموقع ─── */
+        #main-content-wrapper {
+            opacity: 0;
+            transition: opacity 1s ease 0.3s;
+        }
+        #main-content-wrapper.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body style="overflow: hidden;"> 
+
+    <div id="intro">
+        <div class="top-line"></div>
+        <div class="dot-indicator"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+
+        <div class="intro-content">
+            <div class="icons-row">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                </div>
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </div>
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
+            </div>
+
+            <div>
+                <div class="welcome-line">Welcome to my world</div>
+                <div class="portfolio-line">Nabil Architecture</div>
+            </div>
+
+            <div class="url-box">
+                <span class="url-icon">⊕</span>
+                <span class="url-text" id="typewriter"></span><span class="cursor"></span>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+    </div>
+    <div id="main-content-wrapper">
+        <nav id="navbar">
+            <div class="nav-container">
+                <a href="#home" class="logo">Nabil<span>.</span></a>
+                <ul class="nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#projects">Work</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
+
+        <section id="home" class="hero-section">
+            <div class="ambient-glow"></div>
+            <div class="hero-container">
+                <div class="hero-content reveal">
+                    <div class="status-badge">
+                        <span class="pulse-dot"></span>
+                        <span class="badge-text">System Architect &amp; Engineer</span>
+                    </div>
+
+                    <h1 class="hero-headline">
+                        Building elegant software with<br>
+                        <span class="accent-text">precision.</span>
+                    </h1>
+
+                    <p class="hero-description">
+                        Transforming complex business challenges into refined AI-driven solutions. Focused on scalable architectures,
+                         machine learning integration, and seamless automation.
+                    </p>
+
+                    <div class="hero-cta-stack">
+                        <div class="hero-cta-group">
+                            <a href="#projects" class="btn btn-primary">Explore Architecture</a>
+                            <a href="#contact" class="btn btn-secondary">Initiate Contact <i class="far fa-envelope" aria-hidden="true"></i></a>
+                        </div>
+                        <div class="social-icons" aria-label="Social links">
+                            <a href="https://github.com/nebo23" class="icon-box" aria-label="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>
+                            <a href="https://www.linkedin.com/in/nabilahmedx/" class="icon-box" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
+                            <a href="https://web.facebook.com/nabil.ahmednabil.96" class="icon-box" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                            <a href="https://www.instagram.com/nabil.ahmed_1/" class="icon-box" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                            <a href="https://web.telegram.org/a/#8437336559" class="icon-box" aria-label="Telegram"><i class="fab fa-telegram-plane" aria-hidden="true"></i></a>
+                        </div>
+                        <div class="hero-live-code" aria-hidden="true">
+                            <div class="hero-live-code-lines">
+                                <span id="hero-code-output"></span><span class="hero-live-code-cursor"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-visual reveal-right" id="hero-visual-area">
+                    <div class="perspective-wrapper">
+                        <div class="card-3d" id="card-3d">
+                            <div class="layer card-base"></div>
+                            <div class="layer card-terminal">
+                                <div class="terminal-header">
+                                    <div class="window-controls">
+                                        <span class="dot close"></span>
+                                        <span class="dot minimize"></span>
+                                        <span class="dot maximize"></span>
+                                    </div>
+                                    <div class="terminal-title">core_architecture.ts</div>
+                                </div>
+                                <div class="terminal-body">
+<pre><code><span class="kw">import</span> { ScalableSystem } <span class="kw">from</span> <span class="str">'@engineering'</span>;
+
+<span class="kw">const</span> architecture = <span class="kw">new</span> ScalableSystem({
+  <span class="prop">precision</span>: <span class="bool">true</span>,
+  <span class="prop">performance</span>: <span class="str">'optimal'</span>,
+  <span class="prop">automation</span>: <span class="str">'seamless'</span>
+});
+
+architecture.<span class="meth">deploy</span>();
+<span class="cmt">// Output: System operational.</span></code></pre>
+                                </div>
+                            </div>
+
+                            <div class="layer card-pills">
+                                <div class="tech-pill pill-top">Clean Code</div>
+                                <div class="tech-pill pill-bottom">Automation</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <main>
+            <section id="about" class="about about-showcase section-spotlight-host" aria-labelledby="about-heading">
+                <div class="section-spotlight-layer" aria-hidden="true"></div>
+                <div class="container about-showcase-container section-spotlight-content">
+                    <header class="about-showcase-header">
+                        <p class="about-eyebrow">Mindset &amp; expertise</p>
+                        <h2 id="about-heading" class="section-title section-title--about">About Me</h2>
+                    </header>
+
+                    <div class="about-showcase-layout">
+                        <figure class="about-figure">
+                            <div class="about-figure-frame">
+                                <div class="about-figure-inner">
+                                    <div class="about-picture-wrap">
+                                        <img
+                                            class="about-portrait-img"
+                                            src="assets/about-photo.png"
+                                            alt="Nabil — software engineer focused on architecture and automation"
+                                            width="900"
+                                            height="1200"
+                                            loading="lazy"
+                                            decoding="async"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="about-figure-curtain" aria-hidden="true"></div>
+                                <div class="about-figure-rim" aria-hidden="true"></div>
+                            </div>
+                            <figcaption class="visually-hidden">Portrait in a professional setting.</figcaption>
+                        </figure>
+
+                        <div class="about-showcase-body">
+                            <div class="about-showcase-body-inner">
+                                <div class="about-identity">
+                                    <p class="about-lead">
+                                        I am a Full-Stack Systems Engineer dedicated to building high-performance, scalable digital products. I specialize in architecting robust backend systems and seamless user experiences, ensuring every layer of the stack is optimized for speed and reliability.
+                                    </p>
+                                    <p>
+                                        From designing complex database schemas to deploying containerized environments, I focus on clean architecture and end-to-end delivery. My goal is to turn intricate business requirements into elegant, production-ready software that scales with your needs.
+                                    </p>
+                                </div>
+
+                                <ul class="about-highlights" aria-label="Focus areas">
+                                    <li>Systems architecture</li>
+                                    <li>ML &amp; automation</li>
+                                    <li>Full-stack delivery</li>
+                                </ul>
+
+                                <div class="skills-container">
+                                    <div class="skill-category">
+                                        <h3>Machine Learning &amp; Data</h3>
+                                        <div class="tags">
+                                            <span>Python</span><span>NumPy</span><span>Pandas</span>
+                                            <span>Scikit-learn</span><span>RAG Pipelines</span><span>Computer Vision</span>
+                                        </div>
+                                    </div>
+                                    <div class="skill-category">
+                                        <h3>Automation &amp; Infrastructure</h3>
+                                        <div class="tags">
+                                            <span>n8n</span><span>Chatwoot</span><span>Docker</span>
+                                            <span>WebSockets</span><span>API Orchestration</span>
+                                        </div>
+                                    </div>
+                                    <div class="skill-category">
+                                        <h3>Web &amp; Analytics</h3>
+                                        <div class="tags">
+                                            <span>JavaScript / HTML / CSS</span><span>FastAPI</span>
+                                            <span>PostgreSQL</span><span>MySQL</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="stats" class="stats-section" aria-label="Key statistics">
+                <div class="container">
+                    <div class="stats-grid">
+                        <article class="stat-card">
+                            <p class="stat-value">
+                                <span class="stat-number" data-target="10">0</span><span class="stat-plus">+</span>
+                            </p>
+                            <p class="stat-label">Projects</p>
+                        </article>
+                        <article class="stat-card">
+                            <p class="stat-value">
+                                <span class="stat-number" data-target="7">0</span><span class="stat-plus">+</span>
+                            </p>
+                            <p class="stat-label">Happy Clients</p>
+                        </article>
+                        <article class="stat-card">
+                            <p class="stat-value">
+                                <span class="stat-number" data-target="1">0</span><span class="stat-plus">+</span>
+                            </p>
+                            <p class="stat-label">Years Exp.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section id="projects" class="projects projects-scroll">
+                <div class="container">
+                    <h2 class="section-title projects-section-title">Our Work</h2>
+                    <div class="project-grid">
+                        <article class="project-card">
+                            <div class="card-content">
+                                <h3 class="project-title">Vision Safety Protocol</h3>
+                                <p class="project-desc">Real-time driver drowsiness detection system utilizing DroidCam integration. Engineered custom alert loops and optimized C++ tools for seamless Python execution.</p>
+                                <div class="project-tags"><span>dlib</span><span>Python</span><span>C++</span></div>
+                                <span class="project-link project-link-slide">
+                                    <span class="project-link-text">Visit Live Project</span>
+                                    <span class="project-link-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+                                </span>
+                            </div>
+                        </article>
+
+                        <article class="project-card">
+                            <div class="card-content">
+                                <h3 class="project-title">Omnichannel Support Hub</h3>
+                                <p class="project-desc">Self-hosted Chatwoot instance synchronized with n8n workflows. Designed to route and manage high-volume WhatsApp, Instagram, and Messenger interactions with zero-latency WebSocket connections.</p>
+                                <div class="project-tags"><span>n8n</span><span>Chatwoot</span><span>Easypanel</span></div>
+                                <span class="project-link project-link-slide">
+                                    <span class="project-link-text">Visit Live Project</span>
+                                    <span class="project-link-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+                                </span>
+                            </div>
+                        </article>
+
+                        <article class="project-card">
+                            <div class="card-content">
+                                <h3 class="project-title">AI Automation Atlas</h3>
+                                <p class="project-desc">Architected and deployed a high-conversion digital ecosystem for a 60-hour training program. I handled the entire Full-Stack development, from building the core platform with FastAPI to integrating advanced RAG pipelines for AI assistance and The Landing Page.</p>
+                                <div class="project-tags"><span>Html</span><span>JavaScript</span><span>CSS</span><span>FastAPI</span></div>
+                                <span class="project-link project-link-slide">
+                                    <span class="project-link-text">Visit Live Project</span>
+                                    <span class="project-link-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section id="contact" class="contact contact-fade">
+                <div class="container">
+                    <div class="contact-wrapper">
+                        <div class="contact-info">
+                            <h2 class="section-title">Let's Scale Your Business</h2>
+                            <p>Currently open to discussing innovative automation projects and sophisticated architectural challenges.</p>
+                            <div class="contact-details">
+                                <a href="mailto:nabil.ahmed123x@gmail.com" class="contact-link">nabil.ahmed123x@gmail.com</a>
+                                <div class="social-links">
+                                    <a href="https://www.linkedin.com/in/nabilahmedx/">LinkedIn</a>
+                                    <a href="https://github.com/nebo23">GitHub</a>
+                                    <a href="https://www.instagram.com/nabil.ahmed_1/">Instagram</a>
+                                </div>
+                            </div>
+                        </div>
+                        <form class="contact-form">
+                            <div class="input-group">
+                                <input type="text"  id="name"    required placeholder=" ">
+                                <label for="name">Name</label>
+                            </div>
+                            <div class="input-group">
+                                <input type="email" id="email"   required placeholder=" ">
+                                <label for="email">Email</label>
+                            </div>
+                            <div class="input-group">
+                                <textarea id="message" rows="4"  required placeholder=" "></textarea>
+                                <label for="message">Message</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary submit-btn">Send Transmission</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="container footer-content">
+                <div class="footer-brand">
+                    <h3>Nabil Ahmed</h3>
+                    <p>Full Stack Developer & Website Builder</p>
+                </div>
+                
+                <div class="footer-divider" aria-hidden="true"></div>
+
+                <div class="footer-nav-links">
+                    <a href="#home">Home</a>
+                    <a href="#about">About</a>
+                    <a href="#projects">Projects</a>
+                    <a href="#contact">Contact</a>
+                </div>
+
+                <div class="footer-divider" aria-hidden="true"></div>
+
+                <div class="footer-social-links">
+                    <a href="https://www.linkedin.com/in/nabilahmedx/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                    <a href="https://www.instagram.com/nabil.ahmed_1/" target="_blank" rel="noopener noreferrer">Instagram</a>
+                    <a href="https://github.com/nebo23" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </div>
+
+                <div class="footer-divider" aria-hidden="true"></div>
+                <p class="footer-copyright">Copyright &copy; 2026 Nabil Ahmed. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        const target = document.getElementById('typewriter');
+        const text = 'nabil-dev.io'; // تقدر تعدلها من هنا براحتك
+        let i = 0;
+
+        function type() {
+            if (i <= text.length) {
+                target.textContent = text.slice(0, i);
+                i++;
+                setTimeout(type, 90);
+            }
+        }
+        setTimeout(type, 2400);
+
+        setTimeout(() => {
+            const intro = document.getElementById('intro');
+            const mainWrapper = document.getElementById('main-content-wrapper');
+            
+            intro.classList.add('hide'); 
+            mainWrapper.classList.add('show'); 
+            
+            setTimeout(() => {
+                document.body.style.overflow = 'auto';
+            }, 800); 
+
+        }, 5200);
+    </script>
+</body>
+</html>
