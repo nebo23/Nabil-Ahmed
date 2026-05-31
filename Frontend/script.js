@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       try {
-        const res = await fetch('https://nebox-my-portofolio.hf.space', {
+        const res = await fetch('https://nebox-my-portofolio.hf.space/post_message', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
