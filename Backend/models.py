@@ -1,15 +1,12 @@
-import uuid
-from typing import Optional, List
-from pydantic import BaseModel, Field
+from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy.orm import declarative_base
 
-class message(BaseModel):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4)
-    name: str
-    email: str
-    message: Optional[str] = None
+Base = declarative_base()
 
+class Message(Base):
+    __tablename__ = "messages"
 
-class UpdateMessage(BaseModel):
-    name: Optional[str] = None
-    email: Optional[str] = None
-    message: Optional[str] = None
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    message = Column(Text, nullable=True)

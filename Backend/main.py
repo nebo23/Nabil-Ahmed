@@ -1,14 +1,17 @@
-from fastapi import FastAPI
-from models import message, UpdateMessage
-import uuid
+from fastapi import FastAPI, HTTPException, status, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import HTTPException
+from sqlalchemy.orm import Session
 from typing import List
 import requests 
 import os
 from dotenv import load_dotenv
+from models import Message, Base
+from schemas import UserMessage ,MessageResponse
+from database import engine, get_db
 
 load_dotenv()
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -20,55 +23,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-db: List[message] = []
-
-
-@app.get("/message", response_model=List[message])
-async def get_message():
-    return db
-
-@app.post("/post_message", response_model=message)
-async def post_message(payload: message):
-    db.append(payload)
-    data_for_n8n = payload.dict()
-    data_for_n8n["id"] = str(data_for_n8n["id"])
-    save_message_and_trigger_email(data_for_n8n)
-    return payload
-
-def save_message_and_trigger_email(message_data: dict): # خليها تستلم dict
-
-    n8n_webhook_url = os.getenv("N8N_WEBHOOK_URL")
-
+def auto_reply(message_data: dict):
+    make_webhook_url = os.getenv("MAKE_WEBHOOK_URL")
+    if not make_webhook_url:
+        print("Make URL Not Found")
     try:
-        response = requests.post(n8n_webhook_url, json=message_data)
-        
-
-        print(f"Status: {response.status_code}")
-        print(f"Response Body: {response.text}") 
-        
+        response = requests.post(make_webhook_url, json=message_data)
+        print(f"Make Webhook Status: {response.status_code}")
     except Exception as e:
-        print(f"Error connecting to n8n: {e}")
+        print(f"Error connecting to Make: {e}")
 
 
-@app.put("/update_message/{message_id}", response_model=message)
-async def update_message(message_id: uuid.UUID, payload: UpdateMessage):
-    for item in db:
-        if item.id == message_id:
-            if payload.name is not None:
-                item.name = payload.name
-            if payload.email is not None:
-                item.email = payload.email
-            if payload.message is not None:
-                item.message = payload.message
-            return item
+@app.post("/message", response_model=MessageResponse)
+def create_message(message:UserMessage, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    try:
+        db_message =Message(**message.dict()) 
+        db.add(db_message)
+        db.commit()
+        db.refresh(db_message)
 
-    raise HTTPException(status_code=404, detail="Message not found")
+        data_for_make = message.dict()
+        data_for_make["id"] = db_message.id
+        background_tasks.add_task(auto_reply, data_for_make)
 
-@app.delete("/delete_message/{message_id}", response_model=message)
-async def delete_message(message_id: uuid.UUID):
-    for item in db:
-        if str(item.id) == str(message_id):
-            db.remove(item)
-            return item
-    raise HTTPException(status_code=404, detail="Message not found")
+        return db_message
 
+    except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=str(e))
