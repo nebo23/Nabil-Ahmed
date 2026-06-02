@@ -1,3 +1,14 @@
+# Environment variables
 Backend/.env
-Backend/__pycache__/
+
+# Virtual environment
 Backend/.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# AI / local files
+.agents
+skills-lock.json
